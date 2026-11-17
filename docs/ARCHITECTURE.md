@@ -208,7 +208,7 @@ Cálculo determinístico, sem IA, numa função pura em `shared/utils/` — [ADR
 ## 14. Roadmap
 
 - [x] Escopo, arquitetura, ADRs e modelagem de dados
-- [ ] **Fase 0 — Fundação:** projeto Nuxt 4, projetos Supabase `dev` e `prod`, login + allowlist, migrations base com RLS, lint/typecheck, deploy na Vercel
+- [x] **Fase 0 — Fundação:** projeto Nuxt 4, projetos Supabase `dev` e `prod`, login + allowlist, migrations base com RLS, lint/typecheck, deploy na Vercel
 - [ ] **Fase 1 — Catálogo, ficha técnica e crônicos:** espelho FIPE, mapeamento para perfil técnico, pipeline de IA, jobs, página do veículo
 - [ ] **Fase 2 — Raio-X, manutenção e custo de propriedade**
 - [ ] **Fase 3 — Minha Garagem e alertas**

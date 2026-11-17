@@ -2,7 +2,9 @@
 
 Ficha técnica, fluidos, problemas crônicos, manutenção preventiva e custo real de propriedade de carros e motos em um só lugar, com um diagrama interativo que mostra onde cada modelo costuma dar problema.
 
-> 🚧 **Status:** arquitetura e decisões técnicas documentadas; implementação em andamento a partir da Fase 0.
+> 🚧 **Status:** Fase 0 concluída (fundação, login por convite e deploy na Vercel). Próxima etapa: Fase 1, catálogo, ficha técnica e problemas crônicos.
+>
+> **No ar:** [vobs-car.vercel.app](https://vobs-car.vercel.app). O acesso é por convite, então quem não está na lista vê só a tela de login.
 
 <!-- TODO: adicionar screenshots/GIF do Raio-X quando a Fase 2 estiver pronta -->
 
@@ -79,7 +81,7 @@ docs/       Arquitetura, modelo de dados e ADRs
 ## Roadmap
 
 - [x] Escopo, arquitetura, ADRs e modelagem de dados
-- [ ] **Fase 0 — Fundação:** projeto Nuxt 4, Supabase na nuvem, login + allowlist, migrations base com RLS, deploy na Vercel
+- [x] **Fase 0 — Fundação:** projeto Nuxt 4, Supabase na nuvem, login + allowlist, migrations base com RLS, deploy na Vercel
 - [ ] **Fase 1 — Catálogo, ficha técnica e problemas crônicos**
 - [ ] **Fase 2 — Raio-X, manutenção preventiva e custo de propriedade**
 - [ ] **Fase 3 — Minha Garagem e alertas**
