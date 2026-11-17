@@ -9,6 +9,7 @@
 - Datas em `timestamptz` (eventos) ou `date` (datas de calendário).
 - Dinheiro sempre em **centavos** (`integer`/`bigint`), nunca `float`.
 - **RLS habilitado em todas as tabelas**, com policies criadas na mesma migration da tabela.
+- **Privilégios explícitos:** tabelas novas não ficam expostas automaticamente na API; cada migration concede (`GRANT`) apenas o necessário a `authenticated` e `service_role`. A role `anon` não recebe acesso.
 - Migrations são **forward-only**: migration aplicada nunca é editada; correções viram nova migration.
 - Tipos TypeScript gerados a partir do schema (`supabase gen types`) e usados em `shared/types/`.
 
