@@ -21,10 +21,6 @@ logs
 # Vercel
 .vercel
 
-# Supabase CLI
-supabase/.branches
-supabase/.temp
-
 # Editor / SO
 .DS_Store
 .idea
