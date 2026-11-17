@@ -44,7 +44,7 @@ Destaques:
 - **Geração assíncrona:** jobs com trava contra duplicidade e acompanhamento em tempo real via Supabase Realtime.
 - **Cálculo de custo determinístico:** regras de IPVA por UF, histórico FIPE e preços da ANP, sem números inventados por IA.
 
-Detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), no [modelo de dados](docs/DATABASE.md) e no [design system](docs/DESIGN.md).
+Detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), no [modelo de dados](docs/DATABASE.md), no [design system](docs/DESIGN.md) e no [guia de configuração dos ambientes](docs/SETUP.md).
 
 ## Decisões técnicas (ADRs)
 
@@ -90,7 +90,7 @@ docs/       Arquitetura, modelo de dados e ADRs
 
 ## Rodando localmente
 
-Pré-requisitos: Node.js 24 (versão em `.nvmrc`), pnpm e um projeto no Supabase.
+Pré-requisitos: Node.js 24 (versão em `.nvmrc`), pnpm e um projeto no Supabase. O passo a passo completo, com Supabase, login Google, Vercel e convites, está em [docs/SETUP.md](docs/SETUP.md).
 
 ```bash
 pnpm install

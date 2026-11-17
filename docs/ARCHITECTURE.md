@@ -1,6 +1,6 @@
 # Arquitetura — vobs-car
 
-> Documento vivo. Decisões que mudam a arquitetura são registradas como ADRs em [`docs/adr/`](adr/). Modelo de dados em [`DATABASE.md`](DATABASE.md) e design system em [`DESIGN.md`](DESIGN.md).
+> Documento vivo. Decisões que mudam a arquitetura são registradas como ADRs em [`docs/adr/`](adr/). Modelo de dados em [`DATABASE.md`](DATABASE.md), design system em [`DESIGN.md`](DESIGN.md) e configuração dos ambientes em [`SETUP.md`](SETUP.md).
 
 ## 1. Visão geral
 
