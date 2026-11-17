@@ -1,0 +1,36 @@
+{
+  "name": "vobs-car",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "nuxt typecheck"
+  },
+  "engines": {
+    "node": "^24.15.0"
+  },
+  "packageManager": "pnpm@12.21.0",
+  "dependencies": {
+    "@nuxt/fonts": "^1.2.0",
+    "@nuxt/icon": "^2.6.2",
+    "@nuxtjs/color-mode": "^4.1.0",
+    "@tailwindcss/vite": "^4.3.5",
+    "nuxt": "^4.6.4",
+    "tailwindcss": "^4.3.5",
+    "vue": "^3.5.45",
+    "vue-router": "^5.5.1"
+  },
+  "devDependencies": {
+    "@iconify-json/tabler": "^1.2.46",
+    "@nuxt/eslint": "^1.17.0",
+    "eslint": "^10.15.0",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.14"
+  }
+}

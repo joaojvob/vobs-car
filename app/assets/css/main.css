@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Tokens: docs/DESIGN.md. As paletas e raios padrão do Tailwind são removidos para só existirem os tokens. */
+@theme {
+  --font-sans: "Barlow", system-ui, sans-serif;
+  --font-display: "Barlow Condensed", "Barlow", system-ui, sans-serif;
+
+  --color-*: initial;
+  --color-ground: #E9EBEE;
+  --color-surface: #FFFFFF;
+  --color-ink: #15181C;
+  --color-ink-muted: #4B535C;
+  --color-line: #CDD2D8;
+  --color-line-strong: #8A939D;
+  --color-signal: #F5C400;
+  --color-on-signal: #15181C;
+  --color-severity-high: #B3261E;
+  --color-severity-medium: #E39A0B;
+  --color-severity-low: #2F7A4F;
+
+  --radius-*: initial;
+  --radius-sm: 2px;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --color-ground: #101215;
+  --color-surface: #181B20;
+  --color-ink: #E8EAED;
+  --color-ink-muted: #A3ABB5;
+  --color-line: #2C3138;
+  --color-line-strong: #66707B;
+  --color-severity-high: #E5534B;
+  --color-severity-low: #3FA36B;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-ground);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  .dark :focus-visible {
+    outline-color: var(--color-signal);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+/* Estilos de texto: docs/DESIGN.md, seção Tipografia. */
+@utility type-display {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+@utility type-title {
+  font-family: var(--font-display);
+  font-size: 2.125rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+@utility type-heading {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+@utility type-label {
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+@utility type-body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+@utility type-body-sm {
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+@utility type-caption {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+@utility type-value {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-value-lg {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-control {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
