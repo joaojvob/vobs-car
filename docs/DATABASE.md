@@ -8,6 +8,7 @@
 - Chaves: `bigint generated always as identity` para catálogo e conteúdo; `uuid` para dados de usuário (não enumeráveis).
 - Datas em `timestamptz` (eventos) ou `date` (datas de calendário).
 - Dinheiro sempre em **centavos** (`integer`/`bigint`), nunca `float`.
+- UF sempre no domínio `uf` (`char(2)` restrito às 27 siglas).
 - **RLS habilitado em todas as tabelas**, com policies criadas na mesma migration da tabela.
 - **Privilégios explícitos:** tabelas novas não ficam expostas automaticamente na API; cada migration concede (`GRANT`) apenas o necessário a `authenticated` e `service_role`. A role `anon` não recebe acesso.
 - Migrations são **forward-only**: migration aplicada nunca é editada; correções viram nova migration.
@@ -287,12 +288,12 @@ Os schemas vivem em `shared/schemas/` como `z.discriminatedUnion` por `vehicleTy
 | `note` | text null | |
 | `created_at` | timestamptz | |
 
-**`profiles`** — criado pelo servidor no primeiro login de um e-mail autorizado.
+**`profiles`** — criado pelo servidor no primeiro login de um e-mail autorizado. O cliente só edita `display_name` e `home_uf` (privilégio por coluna).
 | Coluna | Tipo | Notas |
 |---|---|---|
 | `id` | uuid PK FK → auth.users | `ON DELETE CASCADE` |
-| `display_name` | text | |
-| `home_uf` | char(2) null | Premissa padrão de custo |
+| `display_name` | text | 1 a 80 caracteres |
+| `home_uf` | uf null | Premissa padrão de custo |
 | `role` | user_role | Default `member` |
 | `created_at` | timestamptz | |
 
@@ -331,7 +332,7 @@ Sem placa, chassi ou CPF (dados mínimos). A **km atual e a média mensal são d
 
 ## 8. Políticas de acesso (RLS)
 
-Função auxiliar `is_member()` (`security definer`): verdadeira se existe `profiles` para `auth.uid()`.
+Função auxiliar `private.is_member()` (`security definer`): verdadeira se existe `profiles` para `auth.uid()`. Fica no schema `private`, que a API não expõe, como o Supabase recomenda para funções `security definer`.
 
 | Tabelas | Leitura | Escrita |
 |---|---|---|
