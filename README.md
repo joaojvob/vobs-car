@@ -56,8 +56,8 @@ Detalhes em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), no [modelo de dados](d
 | [0006](docs/adr/0006-acesso-restrito.md) | Acesso restrito por convite no MVP |
 | [0007](docs/adr/0007-custo-de-propriedade.md) | Custo de propriedade por cálculo determinístico |
 | [0008](docs/adr/0008-modelagem-veiculos.md) | Modelagem por tipo de veículo e motorização |
-| [0009](docs/adr/0009-ambientes.md) | Ambientes: Supabase local via Docker, app sem container |
 | [0010](docs/adr/0010-base-de-ui.md) | Base de UI: Reka UI e Tailwind CSS v4 com tokens próprios |
+| [0011](docs/adr/0011-ambientes-na-nuvem.md) | Ambientes: Supabase só na nuvem, sem Docker |
 
 ## Stack
 
@@ -79,7 +79,7 @@ docs/       Arquitetura, modelo de dados e ADRs
 ## Roadmap
 
 - [x] Escopo, arquitetura, ADRs e modelagem de dados
-- [ ] **Fase 0 — Fundação:** projeto Nuxt 4, ambiente local com Supabase via Docker, login + allowlist, migrations base com RLS, deploy
+- [ ] **Fase 0 — Fundação:** projeto Nuxt 4, Supabase na nuvem, login + allowlist, migrations base com RLS, deploy na Vercel
 - [ ] **Fase 1 — Catálogo, ficha técnica e problemas crônicos**
 - [ ] **Fase 2 — Raio-X, manutenção preventiva e custo de propriedade**
 - [ ] **Fase 3 — Minha Garagem e alertas**
@@ -88,9 +88,17 @@ docs/       Arquitetura, modelo de dados e ADRs
 
 ## Rodando localmente
 
-Pré-requisitos: Node.js (LTS), pnpm, Docker e Supabase CLI.
+Pré-requisitos: Node.js 24 (versão em `.nvmrc`), pnpm e um projeto no Supabase.
 
-O passo a passo será adicionado junto com a Fase 0.
+```bash
+pnpm install
+pnpm dev          # http://localhost:3100
+
+pnpm lint         # ESLint
+pnpm typecheck    # vue-tsc
+```
+
+A configuração do Supabase será adicionada junto com a Fase 0.
 
 ## Aviso
 

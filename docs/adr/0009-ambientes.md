@@ -1,6 +1,6 @@
 # ADR-0009 — Ambientes: Supabase local via Docker, app sem container
 
-- **Status:** Aceito
+- **Status:** Substituído pelo [ADR-0011](0011-ambientes-na-nuvem.md)
 - **Data:** 2026-11-16
 
 ## Contexto
@@ -15,7 +15,7 @@ A Vercel compila a aplicação a partir do código-fonte (preset `vercel` do Nit
   |---|---|---|
   | Local | `nuxt dev` | Supabase local via Docker (`supabase start`) |
   | Preview | Vercel Preview (um por PR) | Supabase `dev` |
-  | Produção | Vercel (branch `main`) | Supabase `prod` |
+  | Produção | Vercel (branch `master`) | Supabase `prod` |
 
 - Migrations seguem sempre a ordem **local → dev → prod**.
 - A aplicação **não é containerizada**: o deploy usa a integração Git da Vercel.

@@ -125,7 +125,7 @@ vobs-car/
 │   ├── types/                  # Tipos inferidos + tipos gerados do Supabase
 │   └── utils/                  # Cálculo de custo, plano de manutenção, km estimada
 ├── supabase/
-│   ├── config.toml             # Configuração do Supabase local (Docker)
+│   ├── config.toml             # Configuração do Supabase CLI
 │   ├── migrations/             # SQL versionado (forward-only, com RLS)
 │   └── seed.sql                # Dados de referência (UFs, regras de IPVA)
 └── docs/                       # Arquitetura, banco e ADRs
@@ -197,8 +197,8 @@ Cálculo determinístico, sem IA, numa função pura em `shared/utils/` — [ADR
 
 | Tema | Abordagem |
 |---|---|
-| Ambientes | Local (`nuxt dev` + Supabase local via Docker), preview (Vercel Preview + Supabase `dev`) e produção (Vercel + Supabase `prod`). A aplicação não é containerizada — [ADR-0009](adr/0009-ambientes.md). |
-| Migrations | SQL versionado em `supabase/migrations/`, forward-only, aplicado na ordem local → dev → prod. Tipos TS gerados a partir do schema. |
+| Ambientes | Desenvolvimento (`nuxt dev` + Supabase `dev`), preview (Vercel Preview + Supabase `dev`) e produção (Vercel + Supabase `prod`). Sem Docker e sem container para a aplicação — [ADR-0011](adr/0011-ambientes-na-nuvem.md). |
+| Migrations | SQL versionado em `supabase/migrations/`, forward-only, aplicado na ordem dev → prod. Tipos TS gerados a partir do schema. |
 | Cota da IA (free tier) | Geração sob demanda por seção, reaproveitamento por perfil, trava de job e limite diário. |
 | Limite da FIPE | Espelho local do catálogo; sincronização preguiçosa (sob demanda) e preços mensais. |
 | Duração das funções | Processamento com `waitUntil`; plano B: Supabase Edge Function com o mesmo contrato de job. |
@@ -208,7 +208,7 @@ Cálculo determinístico, sem IA, numa função pura em `shared/utils/` — [ADR
 ## 14. Roadmap
 
 - [x] Escopo, arquitetura, ADRs e modelagem de dados
-- [ ] **Fase 0 — Fundação:** projeto Nuxt 4, Supabase local via Docker + projetos dev/prod, login + allowlist, migrations base com RLS, lint/typecheck, deploy na Vercel
+- [ ] **Fase 0 — Fundação:** projeto Nuxt 4, projetos Supabase `dev` e `prod`, login + allowlist, migrations base com RLS, lint/typecheck, deploy na Vercel
 - [ ] **Fase 1 — Catálogo, ficha técnica e crônicos:** espelho FIPE, mapeamento para perfil técnico, pipeline de IA, jobs, página do veículo
 - [ ] **Fase 2 — Raio-X, manutenção e custo de propriedade**
 - [ ] **Fase 3 — Minha Garagem e alertas**
@@ -227,5 +227,6 @@ Cálculo determinístico, sem IA, numa função pura em `shared/utils/` — [ADR
 | [0006](adr/0006-acesso-restrito.md) | Acesso restrito por convite no MVP | Aceito |
 | [0007](adr/0007-custo-de-propriedade.md) | Custo de propriedade por cálculo determinístico | Aceito |
 | [0008](adr/0008-modelagem-veiculos.md) | Modelagem por tipo de veículo e motorização | Aceito |
-| [0009](adr/0009-ambientes.md) | Ambientes: Supabase local via Docker, app sem container | Aceito |
+| [0009](adr/0009-ambientes.md) | Ambientes: Supabase local via Docker, app sem container | Substituído pelo 0011 |
 | [0010](adr/0010-base-de-ui.md) | Base de UI: Reka UI e Tailwind CSS v4 com tokens próprios | Aceito |
+| [0011](adr/0011-ambientes-na-nuvem.md) | Ambientes: Supabase só na nuvem, sem Docker | Aceito |

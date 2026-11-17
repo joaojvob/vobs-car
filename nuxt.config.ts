@@ -1,0 +1,52 @@
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineNuxtConfig({
+  modules: ['@nuxt/eslint', '@nuxt/fonts', '@nuxt/icon', '@nuxtjs/color-mode'],
+
+  devtools: { enabled: true },
+
+  app: {
+    head: {
+      htmlAttrs: { lang: 'pt-BR' },
+      title: 'vobs-car',
+      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    },
+  },
+
+  css: ['~/assets/css/main.css'],
+
+  colorMode: {
+    classSuffix: '',
+    fallback: 'light',
+  },
+
+  devServer: { port: 3100 },
+
+  compatibilityDate: '2026-11-17',
+
+  vite: {
+    plugins: [tailwindcss()],
+  },
+
+  typescript: { strict: true },
+
+  eslint: {
+    config: { stylistic: true },
+  },
+
+  // Fontes baixadas no build e servidas pelo próprio app, sem requisição ao Google em runtime.
+  fonts: {
+    defaults: { styles: ['normal'], subsets: ['latin'] },
+    families: [
+      { name: 'Barlow', provider: 'google', weights: [400, 500, 600], global: true },
+      { name: 'Barlow Condensed', provider: 'google', weights: [500, 600, 700], global: true },
+    ],
+  },
+
+  // Só o Tabler, embutido no bundle: um ícone de outro conjunto falha em vez de ser buscado na API do Iconify.
+  icon: {
+    serverBundle: { collections: ['tabler'] },
+    clientBundle: { scan: true },
+    fallbackToApi: false,
+  },
+})

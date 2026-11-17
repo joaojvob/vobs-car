@@ -56,7 +56,7 @@ No tema escuro, todos os selos de gravidade usam texto `#15181C`.
 
 ## Tipografia
 
-Duas famílias da mesma origem, carregadas pelo Google Fonts:
+Duas famílias da mesma origem, do Google Fonts, baixadas no build e servidas pelo próprio app (`@nuxt/fonts`):
 
 - **Barlow Condensed** (500, 600, 700): títulos, rótulos, abas, botões e totais.
 - **Barlow** (400, 500, 600): texto corrido e valores.
@@ -136,7 +136,13 @@ Para não cair no visual padrão de kits prontos:
 
 ## Tokens no código
 
-Os tokens vivem em `app/assets/css/main.css`. Esboço de referência:
+Os tokens vivem em [`app/assets/css/main.css`](../app/assets/css/main.css), que é a fonte da verdade:
+
+- a paleta e os raios padrão do Tailwind são removidos, então só existem as cores e o raio dos tokens;
+- cada estilo de texto vira um utilitário `type-*` (`type-label`, `type-value`, `type-control`…), que já aplica família, peso, tamanho, caixa e algarismos tabulares;
+- foco visível e `prefers-reduced-motion` ficam na camada base.
+
+Esboço de referência:
 
 ```css
 @import "tailwindcss";
