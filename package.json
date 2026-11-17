@@ -10,7 +10,8 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "db:types": "supabase gen types typescript --remote > shared/types/database.ts"
   },
   "engines": {
     "node": "^24.15.0"
@@ -30,6 +31,7 @@
     "@iconify-json/tabler": "^1.2.46",
     "@nuxt/eslint": "^1.17.0",
     "eslint": "^10.15.0",
+    "supabase": "^3.1.0",
     "typescript": "^6.0.3",
     "vue-tsc": "^3.3.14"
   }

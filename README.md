@@ -98,7 +98,14 @@ pnpm lint         # ESLint
 pnpm typecheck    # vue-tsc
 ```
 
-A configuração do Supabase será adicionada junto com a Fase 0.
+O banco roda só no Supabase na nuvem ([ADR-0011](docs/adr/0011-ambientes-na-nuvem.md)). Para aplicar as migrations num projeto:
+
+```bash
+pnpm exec supabase login
+pnpm exec supabase link --project-ref <id-do-projeto>
+pnpm exec supabase db push --remote   # aplica supabase/migrations
+pnpm db:types                         # gera shared/types/database.ts
+```
 
 ## Aviso
 
