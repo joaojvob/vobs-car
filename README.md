@@ -92,11 +92,14 @@ Pré-requisitos: Node.js 24 (versão em `.nvmrc`), pnpm e um projeto no Supabase
 
 ```bash
 pnpm install
-pnpm dev          # http://localhost:3100
+cp .env.example .env   # preencha com as chaves do projeto Supabase
+pnpm dev               # http://localhost:3100
 
-pnpm lint         # ESLint
-pnpm typecheck    # vue-tsc
+pnpm lint             # ESLint
+pnpm typecheck        # vue-tsc
 ```
+
+O login é feito com Google pelo Supabase Auth, e só e-mails cadastrados em `allowed_emails` viram membros ([ADR-0006](docs/adr/0006-acesso-restrito.md)).
 
 O banco roda só no Supabase na nuvem ([ADR-0011](docs/adr/0011-ambientes-na-nuvem.md)). Para aplicar as migrations num projeto:
 

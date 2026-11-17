@@ -1,7 +1,14 @@
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/fonts', '@nuxt/icon', '@nuxtjs/color-mode'],
+  modules: ['@nuxt/eslint', '@nuxt/fonts', '@nuxt/icon', '@nuxtjs/color-mode', '@nuxtjs/supabase'],
+
+  // Componentes base usam o nome do DESIGN.md (BaseButton), sem o prefixo da pasta.
+  // Pastas específicas vêm antes da genérica, porque são lidas em ordem.
+  components: [
+    { path: '~/components/common', pathPrefix: false },
+    '~/components',
+  ],
 
   devtools: { enabled: true },
 
@@ -28,7 +35,11 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
 
-  typescript: { strict: true },
+  typescript: {
+    strict: true,
+    // Componente não resolvido no template vira erro no typecheck, não só aviso em runtime.
+    tsConfig: { vueCompilerOptions: { checkUnknownComponents: true } },
+  },
 
   eslint: {
     config: { stylistic: true },
@@ -48,5 +59,11 @@ export default defineNuxtConfig({
     serverBundle: { collections: ['tabler'] },
     clientBundle: { scan: true },
     fallbackToApi: false,
+  },
+
+  // O redirecionamento fica no middleware global, que também confere se o usuário é membro (ADR-0006).
+  supabase: {
+    redirect: false,
+    types: '~~/shared/types/database.ts',
   },
 })
