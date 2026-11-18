@@ -6,12 +6,17 @@ import { mappingResultSchema } from '#shared/schemas/tech-profile'
 import { buildProfileKeys } from '#shared/utils/tech-profile-key'
 import { findModelYearById, markMappingFailed } from '../../repositories/fipe-model-years'
 import { saveProfileMapping } from '../../repositories/tech-profiles'
-import type { AiProvider, StructureResult } from '../ai/provider'
+import type { AiProvider, StageUsage, StructureResult } from '../ai/provider'
 import { buildMappingPrompt } from '../ai/prompts/mapping'
 
 type Db = SupabaseClient<Database>
 
-type MappingOutcome = { mapping: ProfileMapping } | { failure: unknown }
+/** Desfecho da etapa 0. `usage` é nulo quando a IA não foi chamada, porque a versão já tinha perfil. */
+export type MappingOutcome
+  = | { status: 'mapped', techProfileId: number, usage: StageUsage | null }
+    | { status: 'failed', reason: string, usage: StageUsage }
+
+type MappingReading = { mapping: ProfileMapping } | { failure: string }
 
 /**
  * Etapa 0 da IA (ADR-0004): identifica o perfil técnico de uma versão FIPE pelo nome, ano e combustível.
@@ -21,9 +26,8 @@ type MappingOutcome = { mapping: ProfileMapping } | { failure: unknown }
  * Versão que já tem perfil é devolvida sem chamar a IA. Resposta fora do schema, de outro tipo de veículo
  * ou "não identificada" marca a versão como `failed`, sem gravar nada parcial. Se o provedor não responder,
  * o `AiUnavailableError` sobe e a versão continua pendente, para tentar de novo.
- * Devolve o id do perfil, ou `null` quando o mapeamento falhou.
  */
-export async function mapModelYear(db: Db, ai: AiProvider, modelYearId: number): Promise<number | null> {
+export async function mapModelYear(db: Db, ai: AiProvider, modelYearId: number): Promise<MappingOutcome> {
   const version = await findModelYearById(db, modelYearId)
 
   if (!version) {
@@ -31,7 +35,7 @@ export async function mapModelYear(db: Db, ai: AiProvider, modelYearId: number):
   }
 
   if (version.techProfile) {
-    return version.techProfile.id
+    return { status: 'mapped', techProfileId: version.techProfile.id, usage: null }
   }
 
   const { brand } = version.model
@@ -43,26 +47,26 @@ export async function mapModelYear(db: Db, ai: AiProvider, modelYearId: number):
     fuel: version.fuel,
   })
   const result = await ai.structure({ stage: 'mapping', prompt, schema: mappingResultSchema })
-  const outcome = toMappingOutcome(result, brand.vehicleType)
-  const context = { modelYearId, promptVersion: prompt.version, model: result.model }
+  const reading = readMapping(result, brand.vehicleType)
+  const usage: StageUsage = { model: result.model, promptVersion: prompt.version, ...result.usage }
 
-  if ('failure' in outcome) {
-    logger.warn('Mapeamento falhou', { ...context, error: outcome.failure })
+  if ('failure' in reading) {
+    logger.warn('Mapeamento falhou', { modelYearId, ...usage, error: reading.failure })
     await markMappingFailed(db, modelYearId)
 
-    return null
+    return { status: 'failed', reason: reading.failure, usage }
   }
 
-  const techProfileId = await saveProfileMapping(db, modelYearId, outcome.mapping, buildProfileKeys(brand.name, outcome.mapping))
+  const techProfileId = await saveProfileMapping(db, modelYearId, reading.mapping, buildProfileKeys(brand.name, reading.mapping))
 
-  logger.info('Versão mapeada', { ...context, techProfileId })
+  logger.info('Versão mapeada', { modelYearId, ...usage, techProfileId })
 
-  return techProfileId
+  return { status: 'mapped', techProfileId, usage }
 }
 
-function toMappingOutcome(result: StructureResult<MappingResult>, vehicleType: VehicleType): MappingOutcome {
+function readMapping(result: StructureResult<MappingResult>, vehicleType: VehicleType): MappingReading {
   if (!result.success) {
-    return { failure: result.error }
+    return { failure: result.error instanceof Error ? result.error.message : String(result.error) }
   }
 
   if (result.data.status === 'unidentified') {

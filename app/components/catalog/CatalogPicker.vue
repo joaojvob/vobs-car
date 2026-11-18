@@ -7,7 +7,9 @@ const { vehicleType } = defineProps<{
 
 const { brandId, modelId, modelYearId, brands, models, modelYears, vehicle, hasError, retry } = useCatalogPicker(vehicleType)
 
-const { data: vehicleData, status: vehicleStatus, error: vehicleError } = vehicle
+const { data: vehicleData, status: vehicleStatus, error: vehicleError, refresh: refreshVehicle } = vehicle
+
+const { state: mappingState, error: mappingError, retry: retryMapping } = useProfileMapping(vehicleData, () => refreshVehicle())
 
 const brandField = computed(() => ({
   options: brands.data.value.map(toOption),
@@ -80,6 +82,9 @@ function toOption(item: CatalogOption) {
     <CatalogVehicleSummary
       v-if="vehicleData"
       :vehicle="vehicleData"
+      :mapping-state="mappingState"
+      :mapping-error="mappingError"
+      @retry-mapping="retryMapping"
     />
     <p
       v-else-if="vehicleStatus === 'pending'"

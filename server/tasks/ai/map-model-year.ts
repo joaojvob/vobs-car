@@ -22,9 +22,9 @@ export default defineTask({
   },
   async run({ payload }) {
     const { modelYearId } = payloadSchema.parse(payload)
-    const techProfileId = await mapModelYear(createServiceRoleClient(), geminiProvider, modelYearId)
+    const outcome = await mapModelYear(createServiceRoleClient(), geminiProvider, modelYearId)
 
-    return { result: { modelYearId, techProfileId } }
+    return { result: { modelYearId, ...outcome } }
   },
 })
 

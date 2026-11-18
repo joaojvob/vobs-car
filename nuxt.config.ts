@@ -37,6 +37,8 @@ export default defineNuxtConfig({
         mapping: 'gemini-3.5-flash-lite',
       },
     },
+    // Jobs de IA que cada usuário pode criar em 24 horas (ADR-0005). Protege a cota gratuita.
+    generationDailyLimit: 20,
   },
 
   devServer: { port: 3100 },

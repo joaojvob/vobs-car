@@ -21,13 +21,25 @@ export interface StructureRequest<T> {
   schema: z.ZodType<T>
 }
 
+/** Tokens de uma chamada. O que o modelo gasta pensando conta como saída. */
+export type AiUsage = {
+  inputTokens: number
+  outputTokens: number
+}
+
+/** Consumo de uma etapa, gravado no job (ADR-0005). */
+export type StageUsage = AiUsage & {
+  model: string
+  promptVersion: string
+}
+
 /**
  * Resposta fora do schema não é falha de infraestrutura: quem chama registra a falha
  * e não grava nada parcial. `model` é o modelo que respondeu.
  */
 export type StructureResult<T>
-  = | { success: true, data: T, model: string }
-    | { success: false, error: unknown, model: string }
+  = | { success: true, data: T, model: string, usage: AiUsage }
+    | { success: false, error: unknown, model: string, usage: AiUsage }
 
 export interface AiProvider {
   structure: <T>(request: StructureRequest<T>) => Promise<StructureResult<T>>
