@@ -57,6 +57,42 @@ export type Database = {
         }
         Relationships: []
       }
+      engines: {
+        Row: {
+          aspiration: Database["public"]["Enums"]["aspiration"] | null
+          code: string | null
+          cylinders: number | null
+          displacement_cc: number | null
+          fuel: Database["public"]["Enums"]["fuel_type"]
+          id: number
+          manufacturer: string
+          powertrain: Database["public"]["Enums"]["powertrain"]
+          slug: string
+        }
+        Insert: {
+          aspiration?: Database["public"]["Enums"]["aspiration"] | null
+          code?: string | null
+          cylinders?: number | null
+          displacement_cc?: number | null
+          fuel: Database["public"]["Enums"]["fuel_type"]
+          id?: never
+          manufacturer: string
+          powertrain: Database["public"]["Enums"]["powertrain"]
+          slug: string
+        }
+        Update: {
+          aspiration?: Database["public"]["Enums"]["aspiration"] | null
+          code?: string | null
+          cylinders?: number | null
+          displacement_cc?: number | null
+          fuel?: Database["public"]["Enums"]["fuel_type"]
+          id?: never
+          manufacturer?: string
+          powertrain?: Database["public"]["Enums"]["powertrain"]
+          slug?: string
+        }
+        Relationships: []
+      }
       fipe_brands: {
         Row: {
           fipe_code: string
@@ -90,30 +126,36 @@ export type Database = {
           fipe_year_code: string
           fuel: Database["public"]["Enums"]["fuel_type"]
           id: number
+          mapping_status: Database["public"]["Enums"]["mapping_status"]
           model_id: number
           model_year: number | null
           price_synced_at: string | null
           synced_at: string
+          tech_profile_id: number | null
         }
         Insert: {
           fipe_vehicle_code?: string | null
           fipe_year_code: string
           fuel: Database["public"]["Enums"]["fuel_type"]
           id?: never
+          mapping_status?: Database["public"]["Enums"]["mapping_status"]
           model_id: number
           model_year?: number | null
           price_synced_at?: string | null
           synced_at?: string
+          tech_profile_id?: number | null
         }
         Update: {
           fipe_vehicle_code?: string | null
           fipe_year_code?: string
           fuel?: Database["public"]["Enums"]["fuel_type"]
           id?: never
+          mapping_status?: Database["public"]["Enums"]["mapping_status"]
           model_id?: number
           model_year?: number | null
           price_synced_at?: string | null
           synced_at?: string
+          tech_profile_id?: number | null
         }
         Relationships: [
           {
@@ -121,6 +163,13 @@ export type Database = {
             columns: ["model_id"]
             isOneToOne: false
             referencedRelation: "fipe_models"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fipe_model_years_tech_profile_id_fkey"
+            columns: ["tech_profile_id"]
+            isOneToOne: false
+            referencedRelation: "tech_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -213,14 +262,123 @@ export type Database = {
         }
         Relationships: []
       }
+      tech_profiles: {
+        Row: {
+          body_type: Database["public"]["Enums"]["body_type"]
+          brand_name: string
+          created_at: string
+          engine_id: number
+          family: string
+          generation: string
+          id: number
+          normalized_key: string
+          transmission_id: number
+          vehicle_type: Database["public"]["Enums"]["vehicle_type"]
+          year_end: number | null
+          year_start: number
+        }
+        Insert: {
+          body_type: Database["public"]["Enums"]["body_type"]
+          brand_name: string
+          created_at?: string
+          engine_id: number
+          family: string
+          generation: string
+          id?: never
+          normalized_key: string
+          transmission_id: number
+          vehicle_type: Database["public"]["Enums"]["vehicle_type"]
+          year_end?: number | null
+          year_start: number
+        }
+        Update: {
+          body_type?: Database["public"]["Enums"]["body_type"]
+          brand_name?: string
+          created_at?: string
+          engine_id?: number
+          family?: string
+          generation?: string
+          id?: never
+          normalized_key?: string
+          transmission_id?: number
+          vehicle_type?: Database["public"]["Enums"]["vehicle_type"]
+          year_end?: number | null
+          year_start?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tech_profiles_engine_id_fkey"
+            columns: ["engine_id"]
+            isOneToOne: false
+            referencedRelation: "engines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tech_profiles_transmission_id_fkey"
+            columns: ["transmission_id"]
+            isOneToOne: false
+            referencedRelation: "transmissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transmissions: {
+        Row: {
+          code: string | null
+          final_drive: Database["public"]["Enums"]["final_drive"] | null
+          gears: number | null
+          id: number
+          slug: string
+          type: Database["public"]["Enums"]["transmission_type"]
+        }
+        Insert: {
+          code?: string | null
+          final_drive?: Database["public"]["Enums"]["final_drive"] | null
+          gears?: number | null
+          id?: never
+          slug: string
+          type: Database["public"]["Enums"]["transmission_type"]
+        }
+        Update: {
+          code?: string | null
+          final_drive?: Database["public"]["Enums"]["final_drive"] | null
+          gears?: number | null
+          id?: never
+          slug?: string
+          type?: Database["public"]["Enums"]["transmission_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      map_model_year: {
+        Args: {
+          p_engine: Json
+          p_model_year_id: number
+          p_profile: Json
+          p_transmission: Json
+        }
+        Returns: number
+      }
     }
     Enums: {
+      aspiration: "natural" | "turbo" | "supercharged"
+      body_type:
+        | "hatch"
+        | "sedan"
+        | "suv"
+        | "pickup"
+        | "van"
+        | "moto_street"
+        | "moto_naked"
+        | "moto_sport"
+        | "moto_trail"
+        | "moto_scooter"
+        | "moto_custom"
+      final_drive: "chain" | "belt" | "shaft" | "gear"
       fuel_type:
         | "gasoline"
         | "ethanol"
@@ -228,6 +386,9 @@ export type Database = {
         | "diesel"
         | "hybrid"
         | "electric"
+      mapping_status: "pending" | "mapped" | "failed"
+      powertrain: "ice" | "hybrid" | "phev" | "ev"
+      transmission_type: "manual" | "automatic" | "cvt" | "dct" | "amt"
       user_role: "member" | "admin"
       vehicle_type: "car" | "motorcycle"
     }
@@ -360,6 +521,21 @@ export const Constants = {
   },
   public: {
     Enums: {
+      aspiration: ["natural", "turbo", "supercharged"],
+      body_type: [
+        "hatch",
+        "sedan",
+        "suv",
+        "pickup",
+        "van",
+        "moto_street",
+        "moto_naked",
+        "moto_sport",
+        "moto_trail",
+        "moto_scooter",
+        "moto_custom",
+      ],
+      final_drive: ["chain", "belt", "shaft", "gear"],
       fuel_type: [
         "gasoline",
         "ethanol",
@@ -368,6 +544,9 @@ export const Constants = {
         "hybrid",
         "electric",
       ],
+      mapping_status: ["pending", "mapped", "failed"],
+      powertrain: ["ice", "hybrid", "phev", "ev"],
+      transmission_type: ["manual", "automatic", "cvt", "dct", "amt"],
       user_role: ["member", "admin"],
       vehicle_type: ["car", "motorcycle"],
     },

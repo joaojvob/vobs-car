@@ -102,8 +102,8 @@ O catálogo é espelhado sob demanda para não depender do limite diário da API
 | `fipe_vehicle_code` | text null                      | Código FIPE do veículo (ex: "005340-6"). Chega junto com o preço |
 | `synced_at`         | timestamptz                    |                                                                  |
 | `price_synced_at`   | timestamptz null               | Última consulta do preço                                         |
-| `tech_profile_id`   | bigint FK null → tech_profiles | Preenchido pelo mapeamento. Entra com `tech_profiles`            |
-| `mapping_status`    | mapping_status                 | Default `pending`. Entra com `tech_profiles`                     |
+| `tech_profile_id`   | bigint FK null → tech_profiles | Preenchido pelo mapeamento                                       |
+| `mapping_status`    | mapping_status                 | Default `pending`. Só fica `mapped` com o perfil preenchido      |
 
 Único: (`model_id`, `fipe_year_code`). Índice: `tech_profile_id`.
 
@@ -119,48 +119,53 @@ O catálogo é espelhado sob demanda para não depender do limite diário da API
 
 ## 2. Perfis técnicos
 
-O perfil técnico é a unidade de conteúdo e cache ([ADR-0002](adr/0002-perfil-tecnico.md)): várias versões FIPE com o mesmo conjunto mecânico apontam para ele.
+O perfil técnico é a unidade de conteúdo e cache ([ADR-0002](adr/0002-perfil-tecnico.md)): várias versões FIPE com o mesmo conjunto mecânico apontam para ele. Motor, câmbio e perfil são casados por chaves montadas a partir do resultado do mapeamento (`shared/utils/tech-profile-key.ts`). Quando a chave já existe, o registro é reaproveitado, e o primeiro a gravar vence.
 
 **`engines`**
-| Coluna | Tipo | Notas |
-|---|---|---|
-| `id` | bigint PK | |
-| `slug` | text único | Ex: `vw-ea211-1-0-mpi` |
-| `manufacturer` | text | |
-| `code` | text null | Código do fabricante |
-| `displacement_cc` | integer null | `null` em elétricos |
-| `cylinders` | smallint null | |
-| `aspiration` | aspiration null | |
-| `fuel` | fuel_type | |
-| `powertrain` | powertrain | |
+| Coluna            | Tipo            | Notas                                                                                        |
+|---                |---              |---                                                                                           |
+| `id`              | bigint PK       |                                                                                              |
+| `slug`            | text único      | Fabricante + código + cilindrada + aspiração + motorização. Ex: `volkswagen-ea211-1-0-turbo` |
+| `manufacturer`    | text            |                                                                                              |
+| `code`            | text null       | Código do fabricante                                                                         |
+| `displacement_cc` | integer null    | `null` só em elétricos                                                                       |
+| `cylinders`       | smallint null   | `null` só em elétricos                                                                       |
+| `aspiration`      | aspiration null | `null` só em elétricos                                                                       |
+| `fuel`            | fuel_type       | `electric` só em elétricos. Nunca `hybrid`, que descreve a versão e não o motor              |
+| `powertrain`      | powertrain      |                                                                                              |
+
+O combustível fica fora do slug porque a FIPE chama o mesmo motor de "Flex" num ano e de "Gasolina" em outro, e isso dividiria um perfil em dois. A exceção é o diesel, que é sempre outro motor. A cilindrada entra arredondada: em litros com uma casa nos carros (1596 cc vira `1-6`) e em múltiplos de 10 cc nas motos.
 
 **`transmissions`**
-| Coluna | Tipo | Notas |
-|---|---|---|
-| `id` | bigint PK | |
-| `slug` | text único | |
-| `type` | transmission_type | |
-| `code` | text null | Ex: "DQ200", "Powershift DPS6" |
-| `gears` | smallint null | |
-| `final_drive` | final_drive null | Apenas motos |
+| Coluna        | Tipo              | Notas                                                                                 |
+|---            |---                |---                                                                                    |
+| `id`          | bigint PK         |                                                                                       |
+| `slug`        | text único        | Tipo + código. Sem código: marca + tipo + marchas. Em motos, mais a transmissão final |
+| `type`        | transmission_type |                                                                                       |
+| `code`        | text null         | Ex: "DQ200", "DPS6"                                                                   |
+| `gears`       | smallint null     | `null` só em CVT                                                                      |
+| `final_drive` | final_drive null  | Apenas motos                                                                          |
 
-Tabela própria porque problemas de câmbio atravessam modelos (o mesmo câmbio equipa vários carros).
+Tabela própria porque problemas de câmbio atravessam modelos (o mesmo câmbio equipa vários carros). Com código, o câmbio é compartilhado entre marcas, como o DQ200 da VW e da Audi. Sem código, fica restrito à marca, porque "manual de 5 marchas" sozinho juntaria câmbios diferentes.
 
 **`tech_profiles`**
-| Coluna | Tipo | Notas |
-|---|---|---|
-| `id` | bigint PK | |
-| `slug` | text único | Usado na URL |
-| `normalized_key` | text único | Chave determinística: marca + família + geração + motor + câmbio |
-| `vehicle_type` | vehicle_type | |
-| `body_type` | body_type | Define o template SVG do Raio-X |
-| `brand_name` | text | |
-| `family` | text | Ex: "Gol" |
-| `generation` | text | Ex: "G6 (2013–2016)" |
-| `year_start` / `year_end` | smallint / smallint null | |
-| `engine_id` | bigint FK → engines | |
-| `transmission_id` | bigint FK → transmissions | |
-| `created_at` | timestamptz | |
+| Coluna                    | Tipo                      | Notas                                                                        |
+|---                        |---                        |---                                                                           |
+| `id`                      | bigint PK                 |                                                                              |
+| `normalized_key`          | text único                | Tipo + marca + família + geração + slug do motor + slug do câmbio            |
+| `vehicle_type`            | vehicle_type              | Vem da versão FIPE                                                           |
+| `body_type`               | body_type                 | Define o template SVG do Raio-X. As carrocerias `moto_*` só valem para motos |
+| `brand_name`              | text                      | Nome da marca na FIPE                                                        |
+| `family`                  | text                      | Ex: "Gol"                                                                    |
+| `generation`              | text                      | Nome curto. Ex: "G6"                                                         |
+| `year_start` / `year_end` | smallint / smallint null  | Anos-modelo da geração. `year_end` nulo: ainda em produção                   |
+| `engine_id`               | bigint FK → engines       |                                                                              |
+| `transmission_id`         | bigint FK → transmissions |                                                                              |
+| `created_at`              | timestamptz               |                                                                              |
+
+Índices: `engine_id` e `transmission_id`. O `slug` usado na URL entra com a página do veículo.
+
+A função `map_model_year` grava o resultado de um mapeamento numa única transação: cria motor, câmbio e perfil se ainda não existirem e liga a versão FIPE ao perfil, com `mapping_status = 'mapped'`. O tipo de veículo e a marca do perfil vêm da própria versão, para não divergirem dela. Só o `service_role` executa a função.
 
 ## 3. Conteúdo versionado
 
