@@ -1,6 +1,6 @@
 # Configuração dos ambientes
 
-Como montar os ambientes do vobs-car do zero: Supabase, login com Google, token da FIPE, Vercel e máquina local. Para convidar pessoas, veja [INVITES.md](INVITES.md).
+Como montar os ambientes do vobs-car do zero: Supabase, login com Google, token da FIPE, Vercel e máquina local. Para convidar pessoas, veja [INVITES.md](INVITES.md); para a rotina com o app no ar, [OPERATIONS.md](OPERATIONS.md).
 
 Decisões relacionadas: [ADR-0006](adr/0006-acesso-restrito.md) (acesso por convite) e [ADR-0011](adr/0011-ambientes-na-nuvem.md) (ambientes sem Docker).
 

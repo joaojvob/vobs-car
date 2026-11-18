@@ -94,7 +94,7 @@ docs/       Arquitetura, modelo de dados, design system, configuração e ADRs
 
 ## Rodando localmente
 
-Precisa de Node.js 24 (versão em `.nvmrc`), pnpm e um projeto no Supabase. O passo a passo completo, com Supabase, login Google e Vercel, está em [docs/SETUP.md](docs/SETUP.md), e o de convidar pessoas em [docs/INVITES.md](docs/INVITES.md).
+Precisa de Node.js 24 (versão em `.nvmrc`), pnpm e um projeto no Supabase. O passo a passo completo, com Supabase, login Google e Vercel, está em [docs/SETUP.md](docs/SETUP.md). Convidar pessoas está em [docs/INVITES.md](docs/INVITES.md), e a rotina de produção (publicar, conferir, logs e rollback) em [docs/OPERATIONS.md](docs/OPERATIONS.md).
 
 ```bash
 pnpm install
