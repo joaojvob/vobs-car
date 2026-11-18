@@ -22,10 +22,21 @@
 
   --radius-*: initial;
   --radius-sm: 2px;
+
+  /* Sombra só em sobreposições (lista do combobox, modal, menu). A cor muda no tema escuro. */
+  --shadow-*: initial;
+  --shadow-overlay: 0 8px 24px var(--overlay-shadow-color);
+}
+
+/* Fora do @theme: o Tailwind copia os valores do tema para as classes, e esta cor precisa mudar com o .dark. */
+:root {
+  --overlay-shadow-color: rgb(21 24 28 / 0.16);
 }
 
 .dark {
   color-scheme: dark;
+
+  --overlay-shadow-color: rgb(0 0 0 / 0.5);
 
   --color-ground: #101215;
   --color-surface: #181B20;

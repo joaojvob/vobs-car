@@ -57,6 +57,138 @@ export type Database = {
         }
         Relationships: []
       }
+      fipe_brands: {
+        Row: {
+          fipe_code: string
+          id: number
+          models_synced_at: string | null
+          name: string
+          synced_at: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type"]
+        }
+        Insert: {
+          fipe_code: string
+          id?: never
+          models_synced_at?: string | null
+          name: string
+          synced_at?: string
+          vehicle_type: Database["public"]["Enums"]["vehicle_type"]
+        }
+        Update: {
+          fipe_code?: string
+          id?: never
+          models_synced_at?: string | null
+          name?: string
+          synced_at?: string
+          vehicle_type?: Database["public"]["Enums"]["vehicle_type"]
+        }
+        Relationships: []
+      }
+      fipe_model_years: {
+        Row: {
+          fipe_vehicle_code: string | null
+          fipe_year_code: string
+          fuel: Database["public"]["Enums"]["fuel_type"]
+          id: number
+          model_id: number
+          model_year: number | null
+          price_synced_at: string | null
+          synced_at: string
+        }
+        Insert: {
+          fipe_vehicle_code?: string | null
+          fipe_year_code: string
+          fuel: Database["public"]["Enums"]["fuel_type"]
+          id?: never
+          model_id: number
+          model_year?: number | null
+          price_synced_at?: string | null
+          synced_at?: string
+        }
+        Update: {
+          fipe_vehicle_code?: string | null
+          fipe_year_code?: string
+          fuel?: Database["public"]["Enums"]["fuel_type"]
+          id?: never
+          model_id?: number
+          model_year?: number | null
+          price_synced_at?: string | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fipe_model_years_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "fipe_models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fipe_models: {
+        Row: {
+          brand_id: number
+          fipe_code: string
+          id: number
+          name: string
+          synced_at: string
+          years_synced_at: string | null
+        }
+        Insert: {
+          brand_id: number
+          fipe_code: string
+          id?: never
+          name: string
+          synced_at?: string
+          years_synced_at?: string | null
+        }
+        Update: {
+          brand_id?: number
+          fipe_code?: string
+          id?: never
+          name?: string
+          synced_at?: string
+          years_synced_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fipe_models_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "fipe_brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fipe_prices: {
+        Row: {
+          id: number
+          model_year_id: number
+          price_cents: number
+          reference_month: string
+        }
+        Insert: {
+          id?: never
+          model_year_id: number
+          price_cents: number
+          reference_month: string
+        }
+        Update: {
+          id?: never
+          model_year_id?: number
+          price_cents?: number
+          reference_month?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fipe_prices_model_year_id_fkey"
+            columns: ["model_year_id"]
+            isOneToOne: false
+            referencedRelation: "fipe_model_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -89,7 +221,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      fuel_type:
+        | "gasoline"
+        | "ethanol"
+        | "flex"
+        | "diesel"
+        | "hybrid"
+        | "electric"
       user_role: "member" | "admin"
+      vehicle_type: "car" | "motorcycle"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -220,7 +360,16 @@ export const Constants = {
   },
   public: {
     Enums: {
+      fuel_type: [
+        "gasoline",
+        "ethanol",
+        "flex",
+        "diesel",
+        "hybrid",
+        "electric",
+      ],
       user_role: ["member", "admin"],
+      vehicle_type: ["car", "motorcycle"],
     },
   },
 } as const

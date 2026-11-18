@@ -27,6 +27,11 @@ export default defineNuxtConfig({
     fallback: 'light',
   },
 
+  // Só no servidor. Sobrescrito em tempo de execução pelas variáveis NUXT_* (.env.example).
+  runtimeConfig: {
+    fipeApiToken: '',
+  },
+
   devServer: { port: 3100 },
 
   compatibilityDate: '2026-11-17',
