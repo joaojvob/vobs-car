@@ -92,6 +92,7 @@ A secret key do Supabase pode ser trocada sem tirar o app do ar, porque o projet
 | Supabase | Sem backup automático                                                                     | O catálogo é refeito sozinho a partir da FIPE. Antes de uma migration que apaga dados, exporte as tabelas afetadas em CSV pelo **Table Editor** |
 | Vercel   | Logs só da última hora e rollback só para o deploy anterior                               | Seções 3 e 4                                                                                                                                    |
 | FIPE     | 1.000 consultas por dia com o token                                                       | O espelho no banco segura o consumo. Se a cota acabar, o catálogo segue com o que já foi consultado e o resto volta no dia seguinte             |
+| Gemini   | Cota diária por modelo no plano gratuito, em **Limite de taxa** no AI Studio              | Sem cota, a geração falha e o usuário tenta de novo depois. Cada usuário tem 20 gerações a cada 24 horas (`NUXT_GENERATION_DAILY_LIMIT`)        |
 
 ## 7. Problemas comuns
 
@@ -102,3 +103,4 @@ A secret key do Supabase pode ser trocada sem tirar o app do ar, porque o projet
 | Erro 500 logo depois do merge de um PR com migration | Migration não aplicada no prod                       | Seção 1                                                     |
 | Variável trocada, mas o app segue com o valor antigo | Faltou o redeploy                                    | Seção 5                                                     |
 | "A tabela FIPE está fora do ar" no catálogo          | FIPE fora do ar ou cota esgotada, sem cópia no banco | Buscar `FIPE indisponível` nos logs (seção 3)               |
+| "Não foi possível identificar" em motor e câmbio     | Cota do Gemini esgotada ou versão não reconhecida    | Buscar `mapeamento` nos logs (seção 3)                      |

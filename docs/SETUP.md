@@ -128,7 +128,7 @@ A IA usa a Gemini API no plano gratuito ([ADR-0004](adr/0004-pipeline-ia.md)), e
 1. Em [aistudio.google.com/apikey](https://aistudio.google.com/apikey), crie a chave num projeto sem faturamento ativado. Assim, quando a cota acaba, a API recusa a chamada em vez de cobrar.
 2. Coloque a chave em `NUXT_GEMINI_API_KEY`, no `.env` (seção 6) e na Vercel (seção 7).
 
-O modelo de cada etapa tem um padrão no `nuxt.config.ts` e pode ser trocado por variável, como `NUXT_GEMINI_MODELS_MAPPING`.
+O modelo de cada etapa tem um padrão no `nuxt.config.ts` e pode ser trocado por variável, como `NUXT_GEMINI_MODELS_MAPPING`. O mesmo vale para o limite de 20 gerações por usuário em 24 horas, em `NUXT_GENERATION_DAILY_LIMIT`.
 
 ## 5. Banco
 
