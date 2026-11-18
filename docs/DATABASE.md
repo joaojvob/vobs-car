@@ -65,51 +65,55 @@ erDiagram
 
 ## 1. Catálogo (espelho da FIPE)
 
-O catálogo é espelhado sob demanda para não depender do limite diário da API e para servir de base aos cálculos de custo.
+O catálogo é espelhado sob demanda para não depender do limite diário da API e para servir de base aos cálculos de custo. Cada lista é buscada na FIPE na primeira consulta e de novo quando passa do prazo: 30 dias para marcas, modelos e anos, 7 dias para o preço. As colunas `*_synced_at` guardam a última busca. Se a FIPE não responder, o servidor devolve o que já está no banco.
 
 **`fipe_brands`**
-| Coluna | Tipo | Notas |
-|---|---|---|
-| `id` | bigint PK | |
-| `vehicle_type` | vehicle_type | |
-| `fipe_code` | text | Código da marca na FIPE |
-| `name` | text | |
-| `synced_at` | timestamptz | |
+| Coluna             | Tipo             | Notas                                        |
+|---                 |---               |---                                           |
+| `id`               | bigint PK        |                                              |
+| `vehicle_type`     | vehicle_type     |                                              |
+| `fipe_code`        | text             | Código da marca na FIPE                      |
+| `name`             | text             |                                              |
+| `synced_at`        | timestamptz      | Última vez que a marca veio na lista da FIPE |
+| `models_synced_at` | timestamptz null | Última busca dos modelos da marca            |
 
 Único: (`vehicle_type`, `fipe_code`).
 
 **`fipe_models`**
-| Coluna | Tipo | Notas |
-|---|---|---|
-| `id` | bigint PK | |
-| `brand_id` | bigint FK → fipe_brands | |
-| `fipe_code` | text | |
-| `name` | text | Ex: "Gol 1.0 Mi Total Flex 8V 4p" |
-| `synced_at` | timestamptz | |
+| Coluna            | Tipo                    | Notas                             |
+|---                |---                      |---                                |
+| `id`              | bigint PK               |                                   |
+| `brand_id`        | bigint FK → fipe_brands |                                   |
+| `fipe_code`       | text                    |                                   |
+| `name`            | text                    | Ex: "Gol 1.0 Mi Total Flex 8V 4p" |
+| `synced_at`       | timestamptz             |                                   |
+| `years_synced_at` | timestamptz null        | Última busca dos anos do modelo   |
 
 Único: (`brand_id`, `fipe_code`).
 
 **`fipe_model_years`** — a "versão FIPE" que o usuário seleciona.
-| Coluna | Tipo | Notas |
-|---|---|---|
-| `id` | bigint PK | |
-| `model_id` | bigint FK → fipe_models | |
-| `fipe_year_code` | text | Ex: "2020-1" |
-| `model_year` | smallint null | `null` = zero km |
-| `fuel` | fuel_type | |
-| `fipe_vehicle_code` | text | Código FIPE do veículo (ex: "005340-6") |
-| `tech_profile_id` | bigint FK null → tech_profiles | Preenchido pelo mapeamento |
-| `mapping_status` | mapping_status | Default `pending` |
+| Coluna              | Tipo                           | Notas                                                            |
+|---                  |---                             |---                                                               |
+| `id`                | bigint PK                      |                                                                  |
+| `model_id`          | bigint FK → fipe_models        |                                                                  |
+| `fipe_year_code`    | text                           | Ex: "2020-1". O ano 32000 é como a FIPE marca o zero km          |
+| `model_year`        | smallint null                  | `null` = zero km                                                 |
+| `fuel`              | fuel_type                      | Lido do nome do ano na FIPE ("2020 Flex")                        |
+| `fipe_vehicle_code` | text null                      | Código FIPE do veículo (ex: "005340-6"). Chega junto com o preço |
+| `synced_at`         | timestamptz                    |                                                                  |
+| `price_synced_at`   | timestamptz null               | Última consulta do preço                                         |
+| `tech_profile_id`   | bigint FK null → tech_profiles | Preenchido pelo mapeamento. Entra com `tech_profiles`            |
+| `mapping_status`    | mapping_status                 | Default `pending`. Entra com `tech_profiles`                     |
 
 Único: (`model_id`, `fipe_year_code`). Índice: `tech_profile_id`.
 
 **`fipe_prices`** — base para IPVA e depreciação.
-| Coluna | Tipo | Notas |
-|---|---|---|
-| `id` | bigint PK | |
-| `model_year_id` | bigint FK → fipe_model_years | |
-| `reference_month` | date | Sempre o dia 1 do mês |
-| `price_cents` | bigint | |
+| Coluna            | Tipo                         | Notas                 |
+|---                |---                           |---                    |
+| `id`              | bigint PK                    |                       |
+| `model_year_id`   | bigint FK → fipe_model_years |                       |
+| `reference_month` | date                         | Sempre o dia 1 do mês |
+| `price_cents`     | bigint                       |                       |
 
 Único: (`model_year_id`, `reference_month`).
 

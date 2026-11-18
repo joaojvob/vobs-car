@@ -1,6 +1,6 @@
 # Configuração dos ambientes
 
-Como montar os ambientes do vobs-car do zero: Supabase, login com Google, Vercel e máquina local. Para convidar pessoas, veja [INVITES.md](INVITES.md).
+Como montar os ambientes do vobs-car do zero: Supabase, login com Google, token da FIPE, Vercel e máquina local. Para convidar pessoas, veja [INVITES.md](INVITES.md).
 
 Decisões relacionadas: [ADR-0006](adr/0006-acesso-restrito.md) (acesso por convite) e [ADR-0011](adr/0011-ambientes-na-nuvem.md) (ambientes sem Docker).
 
@@ -110,7 +110,16 @@ Em **Clientes → Criar cliente → Aplicativo da Web**:
 
 No projeto Supabase do mesmo ambiente, em **Sign In / Providers → Google**: ative, cole o ID e a chave secreta do client e salve. Deixe **Skip nonce checks** e **Allow users without an email** desligados.
 
-## 4. Banco
+## 4. FIPE
+
+O catálogo vem da API FIPE da Parallelum. Sem token, o limite é de 500 consultas por dia contadas por IP, e na Vercel o IP é compartilhado com outros projetos, então a cota pode acabar sem aviso. Com o token gratuito, são 1.000 consultas por dia, só do app.
+
+1. Crie a conta em [fipe.api.br/register](https://fipe.api.br/register) e copie o token.
+2. Coloque o token em `NUXT_FIPE_API_TOKEN`, no `.env` (seção 6) e na Vercel (seção 7).
+
+O app guarda no banco tudo o que consulta e só volta à FIPE depois de 30 dias para listas e 7 dias para preços, então o consumo diário fica baixo.
+
+## 5. Banco
 
 O Supabase CLI já vem no projeto. Todo comando leva `--remote`, porque não há banco local.
 
@@ -131,17 +140,17 @@ pnpm db:types
 
 Nunca rode `supabase config push`: ele sobrescreve o login do projeto remoto e desliga o Google.
 
-## 5. Máquina local
+## 6. Máquina local
 
 ```bash
 pnpm install
-cp .env.example .env   # preencha com as chaves do dev
+cp .env.example .env   # preencha com as chaves do dev e o token da FIPE
 pnpm dev               # http://localhost:3100
 ```
 
 Para entrar, o seu e-mail precisa estar na lista do `dev` ([INVITES.md](INVITES.md)).
 
-## 6. Vercel
+## 7. Vercel
 
 ### Importar
 
@@ -150,15 +159,16 @@ Para entrar, o seu e-mail precisa estar na lista do `dev` ([INVITES.md](INVITES.
 
 ### Variáveis
 
-Em **Settings → Environment Variables**, o resultado final são seis linhas:
+Em **Settings → Environment Variables**, o resultado final são oito linhas:
 
 | Key                        | Type   | Production            | Preview              |
 |---                         |---     |---                    |---                   |
 | `NUXT_PUBLIC_SUPABASE_URL` | Config | URL do `prod`         | URL do `dev`         |
 | `NUXT_PUBLIC_SUPABASE_KEY` | Config | publishable do `prod` | publishable do `dev` |
 | `NUXT_SUPABASE_SECRET_KEY` | Secret | secret do `prod`      | secret do `dev`      |
+| `NUXT_FIPE_API_TOKEN`      | Secret | token da FIPE         | o mesmo token        |
 
-No formulário, **Key** é o nome e **Value** é o valor. O tipo e o ambiente valem para o formulário inteiro, então são quatro salvamentos: Config + Production, Secret + Production, Config + Preview e Secret + Preview. Use **+ Add new variable** para pôr as duas públicas no mesmo formulário.
+No formulário, **Key** é o nome e **Value** é o valor. O tipo e o ambiente valem para o formulário inteiro, então são quatro salvamentos: Config + Production, Secret + Production, Config + Preview e Secret + Preview. Use **+ Add new variable** para pôr as duas públicas no mesmo formulário, e a secret key junto com o token da FIPE.
 
 Variáveis só valem para deploys novos. Depois de salvar as de Production, faça **Deployments → ⋯ → Redeploy**.
 
@@ -176,7 +186,7 @@ O aviso **Node.js Version Override** é esperado: o `package.json` fixa o Node 2
 
 Cada PR ganha um deploy próprio, com o banco `dev`. Previews pedem login na Vercel; para mostrar a alguém de fora, use o botão **Share** do deploy.
 
-## 7. Verificação e problemas comuns
+## 8. Verificação e problemas comuns
 
 Depois de qualquer mudança:
 
@@ -185,14 +195,15 @@ curl -sI <url-prod>/login | head -1                                # HTTP/2 200
 curl -s -o /dev/null -w '%{http_code}\n' <url-prod>/api/me         # 401
 ```
 
-| Sintoma                                               | Solução                                                           |
-|---                                                    |---                                                                |
-| `ERR_CONNECTION_REFUSED` em `localhost:3100`          | Rodar `pnpm dev` num terminal aberto depois da instalação do Node |
-| 500 na Vercel                                         | Conferir as seis variáveis e fazer Redeploy                       |
-| Depois do Google, volta para a página errada          | Cadastrar a URL do app nas Redirect URLs do Supabase              |
-| `redirect_uri_mismatch` no Google                     | Conferir a URI de redirecionamento do client                      |
-| Convidado não passa da tela do Google                 | Publicar o app no Google (Público-alvo)                           |
-| "Seu e-mail não está na lista de convidados"          | Ver [INVITES.md](INVITES.md)                                      |
-| Aviso da Vercel ao salvar `NUXT_PUBLIC_*` como Secret | Salvar como Config                                                |
-| `db push` tenta `127.0.0.1:54322`                     | Faltou o `--remote`                                               |
-| Botão sem estilo depois de mudar a configuração       | Recarregar a aba com Ctrl+Shift+R                                 |
+| Sintoma                                               | Solução                                                                   |
+|---                                                    |---                                                                        |
+| `ERR_CONNECTION_REFUSED` em `localhost:3100`          | Rodar `pnpm dev` num terminal aberto depois da instalação do Node         |
+| 500 na Vercel                                         | Conferir as variáveis do Supabase e fazer Redeploy                        |
+| "A tabela FIPE está fora do ar" no catálogo           | Conferir o `NUXT_FIPE_API_TOKEN`. Sem ele, a cota por IP pode ter acabado |
+| Depois do Google, volta para a página errada          | Cadastrar a URL do app nas Redirect URLs do Supabase                      |
+| `redirect_uri_mismatch` no Google                     | Conferir a URI de redirecionamento do client                              |
+| Convidado não passa da tela do Google                 | Publicar o app no Google (Público-alvo)                                   |
+| "Seu e-mail não está na lista de convidados"          | Ver [INVITES.md](INVITES.md)                                              |
+| Aviso da Vercel ao salvar `NUXT_PUBLIC_*` como Secret | Salvar como Config                                                        |
+| `db push` tenta `127.0.0.1:54322`                     | Faltou o `--remote`                                                       |
+| Botão sem estilo depois de mudar a configuração       | Recarregar a aba com Ctrl+Shift+R                                         |

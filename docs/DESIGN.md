@@ -79,7 +79,7 @@ Duas famílias da mesma origem, do Google Fonts, baixadas no build e servidas pe
 - **Escala de espaçamento:** 4, 8, 12, 16, 24, 32, 40, 48 px.
 - **Raio:** 0 ou 2 px.
 - **Bordas:** 1 px `line` em painéis; 2 px `ink` para separar totais e cabeçalhos.
-- **Elevação:** sem sombra em cards. Sombra apenas em sobreposições (modal, popover, menu), com um único token.
+- **Elevação:** sem sombra em cards. Sombra apenas em sobreposições (modal, popover, menu, lista do combobox), com um único token: `shadow-overlay`.
 - **Área de toque:** mínimo de 44 × 44 px.
 
 ## Ícones
@@ -92,17 +92,18 @@ Duas famílias da mesma origem, do Google Fonts, baixadas no build e servidas pe
 
 Ficam em `app/components/common/` e são os únicos que usam o Reka UI diretamente.
 
-| Componente | Especificação |
-|---|---|
-| `BaseButton` | Variantes: `primary` (fundo `ink`, texto `surface`), `signal` (fundo `signal`, no máximo um por tela), `secondary` (borda `line-strong`) e `ghost`. Texto em estilo `control`. Altura mínima de 44 px. |
-| `BaseTabs` | Aba ativa com fundo `signal` e texto `on-signal`. Inativas em `ink-muted`. Linha `line` sob o grupo. |
-| `SeverityBadge` | Retângulo preenchido com a cor de gravidade, texto em `label` (ALTA, MÉDIA, BAIXA). |
-| `SpecValue` | Rótulo (`label`), valor (`value`) e linha de metadados (`caption`): fontes, confiança e verificação. |
-| `VerificationTag` | Texto em `caption`: "não verificado", "confirmado por N donos" ou "verificado", com ícone quando confirmado. |
-| `DataList` | Lista de rótulo e valor (`<dl>`), valores alinhados à direita e tabulares. Total separado por borda de 2 px `ink`. |
-| `BasePanel` | Fundo `surface`, borda 1 px `line`, padding de 16 ou 24 px. |
-| `BaseDialog` | Primitiva de diálogo do Reka UI, fundo `surface`, sombra de sobreposição. |
-| `BaseField` | Rótulo visível sempre; borda 1 px `line-strong`; mensagem de erro em texto, não só em cor. |
+| Componente        | Especificação                                                                                                                                                                                                                                                                                |
+|---                |---                                                                                                                                                                                                                                                                                           |
+| `BaseButton`      | Variantes: `primary` (fundo `ink`, texto `surface`), `signal` (fundo `signal`, no máximo um por tela), `secondary` (borda `line-strong`) e `ghost`. Texto em estilo `control`. Altura mínima de 44 px.                                                                                       |
+| `BaseTabs`        | Aba ativa com fundo `signal` e texto `on-signal`. Inativas em `ink-muted`. Linha `line` sob o grupo.                                                                                                                                                                                         |
+| `SeverityBadge`   | Retângulo preenchido com a cor de gravidade, texto em `label` (ALTA, MÉDIA, BAIXA).                                                                                                                                                                                                          |
+| `SpecValue`       | Rótulo (`label`), valor (`value`) e linha de metadados (`caption`): fontes, confiança e verificação.                                                                                                                                                                                         |
+| `VerificationTag` | Texto em `caption`: "não verificado", "confirmado por N donos" ou "verificado", com ícone quando confirmado.                                                                                                                                                                                 |
+| `DataList`        | Lista de rótulo e valor (`<dl>`), valores alinhados à direita e tabulares. Total separado por borda de 2 px `ink`.                                                                                                                                                                           |
+| `BasePanel`       | Fundo `surface`, borda 1 px `line`, padding de 16 ou 24 px.                                                                                                                                                                                                                                  |
+| `BaseDialog`      | Primitiva de diálogo do Reka UI, fundo `surface`, sombra de sobreposição.                                                                                                                                                                                                                    |
+| `BaseField`       | Rótulo visível sempre; borda 1 px `line-strong`; mensagem de erro em texto, não só em cor.                                                                                                                                                                                                   |
+| `BaseCombobox`    | Campo com busca para listas longas (marca, modelo, ano). Rótulo visível, borda 1 px `line-strong`, busca por palavras em qualquer ordem sem diferenciar acento e caixa, lista em sobreposição com `shadow-overlay` e item marcado com ícone de check. Carregamento e erro aparecem em texto. |
 
 **Foco:** contorno de 2 px `ink` com afastamento de 2 px no tema claro e 2 px `signal` no escuro. O foco nunca é removido.
 
@@ -138,7 +139,8 @@ Para não cair no visual padrão de kits prontos:
 
 Os tokens vivem em [`app/assets/css/main.css`](../app/assets/css/main.css), que é a fonte da verdade:
 
-- a paleta e os raios padrão do Tailwind são removidos, então só existem as cores e o raio dos tokens;
+- a paleta, os raios e as sombras padrão do Tailwind são removidos, então só existem as cores, o raio e a sombra dos tokens;
+- a cor da sombra fica numa variável fora do `@theme` (`--overlay-shadow-color`), porque o Tailwind copia os valores do tema para as classes e ela precisa mudar no tema escuro;
 - cada estilo de texto vira um utilitário `type-*` (`type-label`, `type-value`, `type-control`…), que já aplica família, peso, tamanho, caixa e algarismos tabulares;
 - foco visível e `prefers-reduced-motion` ficam na camada base.
 
