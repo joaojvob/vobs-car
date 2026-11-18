@@ -115,6 +115,19 @@ export async function upsertModelYears(
   }
 }
 
+/** Só vale para versão ainda sem perfil: uma versão mapeada não volta a falhar. */
+export async function markMappingFailed(db: Db, id: number): Promise<void> {
+  const { error } = await db
+    .from('fipe_model_years')
+    .update({ mapping_status: 'failed' })
+    .eq('id', id)
+    .is('tech_profile_id', null)
+
+  if (error) {
+    throw error
+  }
+}
+
 export async function markPriceSynced(db: Db, id: number, input: { fipeVehicleCode: string, syncedAt: string }): Promise<void> {
   const { error } = await db
     .from('fipe_model_years')
