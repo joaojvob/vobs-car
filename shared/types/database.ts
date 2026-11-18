@@ -238,6 +238,76 @@ export type Database = {
           },
         ]
       }
+      generation_jobs: {
+        Row: {
+          attempts: number
+          created_at: string
+          error: string | null
+          finished_at: string | null
+          fipe_model_year_id: number | null
+          id: string
+          job_type: Database["public"]["Enums"]["job_type"]
+          requested_by: string
+          section: Database["public"]["Enums"]["section_type"] | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          tech_profile_id: number | null
+          usage: Json | null
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          fipe_model_year_id?: number | null
+          id?: string
+          job_type: Database["public"]["Enums"]["job_type"]
+          requested_by: string
+          section?: Database["public"]["Enums"]["section_type"] | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["job_status"]
+          tech_profile_id?: number | null
+          usage?: Json | null
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          fipe_model_year_id?: number | null
+          id?: string
+          job_type?: Database["public"]["Enums"]["job_type"]
+          requested_by?: string
+          section?: Database["public"]["Enums"]["section_type"] | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["job_status"]
+          tech_profile_id?: number | null
+          usage?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generation_jobs_fipe_model_year_id_fkey"
+            columns: ["fipe_model_year_id"]
+            isOneToOne: false
+            referencedRelation: "fipe_model_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generation_jobs_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "generation_jobs_tech_profile_id_fkey"
+            columns: ["tech_profile_id"]
+            isOneToOne: false
+            referencedRelation: "tech_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -386,8 +456,15 @@ export type Database = {
         | "diesel"
         | "hybrid"
         | "electric"
+      job_status: "pending" | "running" | "succeeded" | "failed"
+      job_type: "map_profile" | "generate_section"
       mapping_status: "pending" | "mapped" | "failed"
       powertrain: "ice" | "hybrid" | "phev" | "ev"
+      section_type:
+        | "specs"
+        | "chronic_issues"
+        | "maintenance_plan"
+        | "pre_purchase"
       transmission_type: "manual" | "automatic" | "cvt" | "dct" | "amt"
       user_role: "member" | "admin"
       vehicle_type: "car" | "motorcycle"
@@ -544,8 +621,16 @@ export const Constants = {
         "hybrid",
         "electric",
       ],
+      job_status: ["pending", "running", "succeeded", "failed"],
+      job_type: ["map_profile", "generate_section"],
       mapping_status: ["pending", "mapped", "failed"],
       powertrain: ["ice", "hybrid", "phev", "ev"],
+      section_type: [
+        "specs",
+        "chronic_issues",
+        "maintenance_plan",
+        "pre_purchase",
+      ],
       transmission_type: ["manual", "automatic", "cvt", "dct", "amt"],
       user_role: ["member", "admin"],
       vehicle_type: ["car", "motorcycle"],

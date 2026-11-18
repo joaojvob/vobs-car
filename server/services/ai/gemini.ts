@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { AiProvider, StructureRequest, StructureResult, StructureStage } from './provider'
+import type { AiProvider, AiUsage, StructureRequest, StructureResult, StructureStage } from './provider'
 import { AiUnavailableError } from './provider'
 
 /*
@@ -19,6 +19,11 @@ const responseSchema = z.object({
     finishReason: z.string().optional(),
   })).optional(),
   modelVersion: z.string().optional(),
+  usageMetadata: z.object({
+    promptTokenCount: z.number().optional(),
+    candidatesTokenCount: z.number().optional(),
+    thoughtsTokenCount: z.number().optional(),
+  }).optional(),
 })
 
 type GenerateContentResponse = z.infer<typeof responseSchema>
@@ -41,6 +46,7 @@ export const geminiProvider: AiProvider = {
       },
     })
     const answeredBy = response.modelVersion ?? model
+    const usage = toUsage(response.usageMetadata)
     const candidate = response.candidates?.[0]
     const text = candidate?.content?.parts
       ?.filter(part => !part.thought)
@@ -54,19 +60,26 @@ export const geminiProvider: AiProvider = {
     catch (error) {
       const reason = candidate?.finishReason ?? 'sem resposta'
 
-      return { success: false, error: new Error(`O Gemini não devolveu JSON (${reason})`, { cause: error }), model: answeredBy }
+      return { success: false, error: new Error(`O Gemini não devolveu JSON (${reason})`, { cause: error }), model: answeredBy, usage }
     }
 
     const parsed = request.schema.safeParse(output)
 
     return parsed.success
-      ? { success: true, data: parsed.data, model: answeredBy }
-      : { success: false, error: parsed.error, model: answeredBy }
+      ? { success: true, data: parsed.data, model: answeredBy, usage }
+      : { success: false, error: parsed.error, model: answeredBy, usage }
   },
 }
 
 function modelFor(stage: StructureStage): string {
   return useRuntimeConfig().gemini.models[stage]
+}
+
+function toUsage(metadata: GenerateContentResponse['usageMetadata']): AiUsage {
+  return {
+    inputTokens: metadata?.promptTokenCount ?? 0,
+    outputTokens: (metadata?.candidatesTokenCount ?? 0) + (metadata?.thoughtsTokenCount ?? 0),
+  }
 }
 
 /** Erro de rede, de status ou de formato vira `AiUnavailableError`: a resposta nem chegou ao schema da etapa. */

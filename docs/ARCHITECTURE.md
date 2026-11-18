@@ -152,6 +152,7 @@ Detalhes em [ADR-0004](adr/0004-pipeline-ia.md).
 - Falha de validação marca o job como `failed`; nada parcial é gravado.
 - Gemini no plano gratuito, com a chave sem faturamento: passar da cota gera erro, nunca cobrança. O modelo de cada etapa fica no `runtimeConfig`. O mapeamento usa o `gemini-3.5-flash-lite`; a pesquisa vai usar o `gemini-2.5-flash-lite`, o único com busca no plano gratuito.
 - No mapeamento, resposta fora do schema ou versão não identificada marca a versão como `failed`. Se o provedor falhar (rede, cota), a versão continua `pending`, para tentar de novo.
+- O mapeamento é um job próprio (`map_profile`). O front pede `POST /api/vehicles/{id}/mapping` assim que uma versão sem perfil é escolhida e acompanha o job até o fim. Depois de uma falha, só o usuário pede de novo, para uma falha não virar uma sequência de chamadas.
 
 ## 8. Confiabilidade dos dados
 
@@ -203,7 +204,7 @@ Cálculo determinístico, sem IA, numa função pura em `shared/utils/` — [ADR
 | Migrations | SQL versionado em `supabase/migrations/`, forward-only, aplicado na ordem dev → prod. Tipos TS gerados a partir do schema. |
 | Cota da IA (free tier) | Geração sob demanda por seção, reaproveitamento por perfil, trava de job e limite diário. |
 | Limite da FIPE | Espelho local do catálogo; sincronização preguiçosa (sob demanda) e preços mensais. |
-| Duração das funções | Processamento com `waitUntil`; plano B: Supabase Edge Function com o mesmo contrato de job. |
+| Duração das funções | Processamento com `waitUntil`, ligado ao da Vercel (`@vercel/functions`) por um plugin do Nitro, que sozinho não o repassa; plano B: Supabase Edge Function com o mesmo contrato de job. |
 | Pausa do Supabase free | O cron diário mantém o projeto de produção ativo. |
 | Observabilidade | Logger central no servidor; `generation_jobs` registra status, erro e consumo de tokens. |
 

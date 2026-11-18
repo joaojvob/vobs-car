@@ -233,25 +233,34 @@ Os schemas vivem em `shared/schemas/` como `z.discriminatedUnion` por `vehicleTy
 
 ## 4. Jobs de geração
 
+Cada mapeamento e cada seção gerada é um job ([ADR-0005](adr/0005-geracao-assincrona.md)). O servidor cria o job, responde na hora e roda a IA depois da resposta. O front acompanha o status pelo Realtime e, de reserva, consulta `GET /api/jobs/{id}`.
+
 **`generation_jobs`**
-| Coluna | Tipo | Notas |
-|---|---|---|
-| `id` | uuid PK | |
-| `job_type` | job_type | |
-| `fipe_model_year_id` | bigint FK null | Para `map_profile` |
-| `tech_profile_id` | bigint FK null | Para `generate_section` |
-| `section` | section_type null | |
-| `status` | job_status | |
-| `attempts` | smallint | Máx. 2 |
-| `error` | text null | Mensagem técnica (sem dados sensíveis) |
-| `usage` | jsonb null | Tokens de entrada/saída por etapa |
-| `requested_by` | uuid FK → profiles | |
-| `created_at` / `started_at` / `finished_at` | timestamptz | |
+| Coluna                                      | Tipo                              | Notas                                                           |
+|---                                          |---                                |---                                                              |
+| `id`                                        | uuid PK                           |                                                                 |
+| `job_type`                                  | job_type                          |                                                                 |
+| `fipe_model_year_id`                        | bigint FK null → fipe_model_years | Só em `map_profile`                                             |
+| `tech_profile_id`                           | bigint FK null → tech_profiles    | Só em `generate_section`, junto com `section`                   |
+| `section`                                   | section_type null                 |                                                                 |
+| `status`                                    | job_status                        | Default `pending`                                               |
+| `attempts`                                  | smallint                          | Tentativas feitas, no máximo 2                                  |
+| `error`                                     | text null                         | Mensagem técnica, sem dados sensíveis                           |
+| `usage`                                     | jsonb null                        | Por etapa: modelo, versão do prompt e tokens de entrada e saída |
+| `requested_by`                              | uuid FK → profiles                | Apagado junto com o perfil                                      |
+| `created_at` / `started_at` / `finished_at` | timestamptz                       |                                                                 |
 
 Índices:
 - Único parcial (`tech_profile_id`, `section`) `WHERE status IN ('pending', 'running')` — trava contra geração duplicada.
 - Único parcial (`fipe_model_year_id`) `WHERE job_type = 'map_profile' AND status IN ('pending', 'running')`.
 - (`requested_by`, `created_at`) — contagem do limite diário por usuário.
+- `fipe_model_year_id` e `tech_profile_id`, das chaves estrangeiras.
+
+Quem pede um job que já está ativo recebe o mesmo job, sem contar no limite. O limite é de 20 jobs por usuário nas últimas 24 horas e pode ser trocado por `NUXT_GENERATION_DAILY_LIMIT`. Contar e criar não é atômico, então pedidos simultâneos podem passar do limite por um.
+
+Só a falha do provedor (rede, cota) ganha uma segunda tentativa; resposta inválida já encerra o job como `failed`. Um job ativo há mais de 5 minutos é encerrado como `failed`, com o erro "Tempo esgotado", na leitura seguinte, para a trava não ficar presa quando a execução morre no meio.
+
+A tabela está na publicação `supabase_realtime`. Pelo RLS, cada membro só recebe os próprios jobs; quem acompanha o job de outro membro usa a consulta de reserva.
 
 ## 5. Custo de propriedade
 
