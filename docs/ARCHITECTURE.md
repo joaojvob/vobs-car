@@ -150,6 +150,8 @@ Detalhes em [ADR-0004](adr/0004-pipeline-ia.md).
 - O provedor fica atrás da interface `AiProvider` (`research`, `structure`); o Gemini é um adapter.
 - Os prompts recebem apenas dados de catálogo validados, nunca texto livre do usuário.
 - Falha de validação marca o job como `failed`; nada parcial é gravado.
+- Gemini no plano gratuito, com a chave sem faturamento: passar da cota gera erro, nunca cobrança. O modelo de cada etapa fica no `runtimeConfig`. O mapeamento usa o `gemini-3.5-flash-lite`; a pesquisa vai usar o `gemini-2.5-flash-lite`, o único com busca no plano gratuito.
+- No mapeamento, resposta fora do schema ou versão não identificada marca a versão como `failed`. Se o provedor falhar (rede, cota), a versão continua `pending`, para tentar de novo.
 
 ## 8. Confiabilidade dos dados
 

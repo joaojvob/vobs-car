@@ -82,3 +82,9 @@ export const profileMappingSchema = z
     path: ['yearEnd'],
     message: 'O último ano da geração não pode ser anterior ao primeiro.',
   })
+
+/** Resposta da etapa 0. A IA pode dizer que não reconheceu a versão, em vez de inventar um perfil. */
+export const mappingResultSchema = z.discriminatedUnion('status', [
+  z.object({ status: z.literal('identified'), profile: profileMappingSchema }),
+  z.object({ status: z.literal('unidentified') }),
+])

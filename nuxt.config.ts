@@ -30,11 +30,23 @@ export default defineNuxtConfig({
   // Só no servidor. Sobrescrito em tempo de execução pelas variáveis NUXT_* (.env.example).
   runtimeConfig: {
     fipeApiToken: '',
+    gemini: {
+      apiKey: '',
+      // Modelo de cada etapa da IA (ADR-0004). Trocar de modelo não exige mudar o código.
+      models: {
+        mapping: 'gemini-3.5-flash-lite',
+      },
+    },
   },
 
   devServer: { port: 3100 },
 
   compatibilityDate: '2026-11-17',
+
+  // Tasks rodam etapas da IA à mão. A rota que as executa só existe no servidor de desenvolvimento.
+  nitro: {
+    experimental: { tasks: true },
+  },
 
   vite: {
     plugins: [tailwindcss()],

@@ -165,7 +165,7 @@ Tabela própria porque problemas de câmbio atravessam modelos (o mesmo câmbio 
 
 Índices: `engine_id` e `transmission_id`. O `slug` usado na URL entra com a página do veículo.
 
-A função `map_model_year` grava o resultado de um mapeamento numa única transação: cria motor, câmbio e perfil se ainda não existirem e liga a versão FIPE ao perfil, com `mapping_status = 'mapped'`. O tipo de veículo e a marca do perfil vêm da própria versão, para não divergirem dela. Só o `service_role` executa a função.
+A função `map_model_year` grava o resultado de um mapeamento numa única transação: cria motor, câmbio e perfil se ainda não existirem e liga a versão FIPE ao perfil, com `mapping_status = 'mapped'`. O tipo de veículo e a marca do perfil vêm da própria versão, para não divergirem dela. Só o `service_role` executa a função. Quando a IA não identifica a versão ou responde fora do formato, nada é gravado e a versão fica com `mapping_status = 'failed'`.
 
 ## 3. Conteúdo versionado
 
