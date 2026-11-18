@@ -1,6 +1,6 @@
 # Configuração dos ambientes
 
-Como montar os ambientes do vobs-car do zero: Supabase, login com Google, token da FIPE, Vercel e máquina local. Para convidar pessoas, veja [INVITES.md](INVITES.md); para a rotina com o app no ar, [OPERATIONS.md](OPERATIONS.md).
+Como montar os ambientes do vobs-car do zero: Supabase, login com Google, token da FIPE, chave do Gemini, Vercel e máquina local. Para convidar pessoas, veja [INVITES.md](INVITES.md); para a rotina com o app no ar, [OPERATIONS.md](OPERATIONS.md).
 
 Decisões relacionadas: [ADR-0006](adr/0006-acesso-restrito.md) (acesso por convite) e [ADR-0011](adr/0011-ambientes-na-nuvem.md) (ambientes sem Docker).
 
@@ -110,7 +110,9 @@ Em **Clientes → Criar cliente → Aplicativo da Web**:
 
 No projeto Supabase do mesmo ambiente, em **Sign In / Providers → Google**: ative, cole o ID e a chave secreta do client e salve. Deixe **Skip nonce checks** e **Allow users without an email** desligados.
 
-## 4. FIPE
+## 4. APIs externas
+
+### FIPE
 
 O catálogo vem da API FIPE da Parallelum. Sem token, o limite é de 500 consultas por dia contadas por IP, e na Vercel o IP é compartilhado com outros projetos, então a cota pode acabar sem aviso. Com o token gratuito, são 1.000 consultas por dia, só do app.
 
@@ -118,6 +120,15 @@ O catálogo vem da API FIPE da Parallelum. Sem token, o limite é de 500 consult
 2. Coloque o token em `NUXT_FIPE_API_TOKEN`, no `.env` (seção 6) e na Vercel (seção 7).
 
 O app guarda no banco tudo o que consulta e só volta à FIPE depois de 30 dias para listas e 7 dias para preços, então o consumo diário fica baixo.
+
+### Gemini
+
+A IA usa a Gemini API no plano gratuito ([ADR-0004](adr/0004-pipeline-ia.md)), e a chave fica só no servidor.
+
+1. Em [aistudio.google.com/apikey](https://aistudio.google.com/apikey), crie a chave num projeto sem faturamento ativado. Assim, quando a cota acaba, a API recusa a chamada em vez de cobrar.
+2. Coloque a chave em `NUXT_GEMINI_API_KEY`, no `.env` (seção 6) e na Vercel (seção 7).
+
+O modelo de cada etapa tem um padrão no `nuxt.config.ts` e pode ser trocado por variável, como `NUXT_GEMINI_MODELS_MAPPING`.
 
 ## 5. Banco
 
@@ -144,11 +155,19 @@ Nunca rode `supabase config push`: ele sobrescreve o login do projeto remoto e d
 
 ```bash
 pnpm install
-cp .env.example .env   # preencha com as chaves do dev e o token da FIPE
+cp .env.example .env   # preencha com as chaves do dev, o token da FIPE e a chave do Gemini
 pnpm dev               # http://localhost:3100
 ```
 
 Para entrar, o seu e-mail precisa estar na lista do `dev` ([INVITES.md](INVITES.md)).
+
+Para mapear uma versão FIPE à mão, com o `pnpm dev` rodando:
+
+```bash
+pnpm exec nuxi task run ai:map-model-year --payload '{"modelYearId": 123}'
+```
+
+O id da versão aparece na chamada `/api/catalog/model-years/<id>`, na aba de rede do navegador, ao escolher a versão no catálogo. Cada execução é uma chamada real ao Gemini e gasta cota.
 
 ## 7. Vercel
 
@@ -159,7 +178,7 @@ Para entrar, o seu e-mail precisa estar na lista do `dev` ([INVITES.md](INVITES.
 
 ### Variáveis
 
-Em **Settings → Environment Variables**, o resultado final são oito linhas:
+Em **Settings → Environment Variables**, o resultado final são dez linhas:
 
 | Key                        | Type   | Production            | Preview              |
 |---                         |---     |---                    |---                   |
@@ -167,8 +186,9 @@ Em **Settings → Environment Variables**, o resultado final são oito linhas:
 | `NUXT_PUBLIC_SUPABASE_KEY` | Config | publishable do `prod` | publishable do `dev` |
 | `NUXT_SUPABASE_SECRET_KEY` | Secret | secret do `prod`      | secret do `dev`      |
 | `NUXT_FIPE_API_TOKEN`      | Secret | token da FIPE         | o mesmo token        |
+| `NUXT_GEMINI_API_KEY`      | Secret | chave do Gemini       | a mesma chave        |
 
-No formulário, **Key** é o nome e **Value** é o valor. O tipo e o ambiente valem para o formulário inteiro, então são quatro salvamentos: Config + Production, Secret + Production, Config + Preview e Secret + Preview. Use **+ Add new variable** para pôr as duas públicas no mesmo formulário, e a secret key junto com o token da FIPE.
+No formulário, **Key** é o nome e **Value** é o valor. O tipo e o ambiente valem para o formulário inteiro, então são quatro salvamentos: Config + Production, Secret + Production, Config + Preview e Secret + Preview. Use **+ Add new variable** para pôr as duas públicas no mesmo formulário, e as três secrets juntas.
 
 Variáveis só valem para deploys novos. Depois de salvar as de Production, faça **Deployments → ⋯ → Redeploy**.
 
