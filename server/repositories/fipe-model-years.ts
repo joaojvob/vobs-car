@@ -1,7 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '#shared/types/database'
 import type { CatalogModelYear, FuelType } from '#shared/types/catalog'
+import type { MappingStatus, TechProfile } from '#shared/types/tech-profile'
 import type { BrandRef } from './fipe-models'
+import { toTechProfile } from './tech-profiles'
 
 type Db = SupabaseClient<Database>
 
@@ -12,6 +14,8 @@ export interface ModelYearRecord {
   fuel: FuelType
   fipeVehicleCode: string | null
   priceSyncedAt: string | null
+  mappingStatus: MappingStatus
+  techProfile: TechProfile | null
   model: {
     id: number
     fipeCode: string
@@ -40,8 +44,13 @@ export async function findModelYearById(db: Db, id: number): Promise<ModelYearRe
   const { data, error } = await db
     .from('fipe_model_years')
     .select(`
-      id, fipe_year_code, model_year, fuel, fipe_vehicle_code, price_synced_at,
-      model:fipe_models (id, fipe_code, name, brand:fipe_brands (id, vehicle_type, fipe_code, name))
+      id, fipe_year_code, model_year, fuel, fipe_vehicle_code, price_synced_at, mapping_status,
+      model:fipe_models (id, fipe_code, name, brand:fipe_brands (id, vehicle_type, fipe_code, name)),
+      tech_profile:tech_profiles (
+        id, vehicle_type, body_type, family, generation, year_start, year_end,
+        engine:engines (powertrain, manufacturer, code, displacement_cc, cylinders, aspiration, fuel),
+        transmission:transmissions (type, code, gears, final_drive)
+      )
     `)
     .eq('id', id)
     .maybeSingle()
@@ -63,6 +72,8 @@ export async function findModelYearById(db: Db, id: number): Promise<ModelYearRe
     fuel: data.fuel,
     fipeVehicleCode: data.fipe_vehicle_code,
     priceSyncedAt: data.price_synced_at,
+    mappingStatus: data.mapping_status,
+    techProfile: data.tech_profile ? toTechProfile(data.tech_profile) : null,
     model: {
       id: model.id,
       fipeCode: model.fipe_code,

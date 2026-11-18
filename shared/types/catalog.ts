@@ -1,4 +1,5 @@
 import type { Enums } from './database'
+import type { VehicleProfile } from './tech-profile'
 
 export type VehicleType = Enums<'vehicle_type'>
 export type FuelType = Enums<'fuel_type'>
@@ -22,7 +23,7 @@ export interface FipePrice {
   referenceMonth: string
 }
 
-/** Versão FIPE escolhida, com marca, modelo e o preço mais recente. */
+/** Versão FIPE escolhida, com marca, modelo, o preço mais recente e o perfil técnico. */
 export interface CatalogVehicle {
   id: number
   vehicleType: VehicleType
@@ -32,4 +33,5 @@ export interface CatalogVehicle {
   fuel: FuelType
   fipeCode: string | null
   price: FipePrice | null
+  profile: VehicleProfile
 }

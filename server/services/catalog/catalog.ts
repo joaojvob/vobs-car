@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '#shared/types/database'
 import type { CatalogModelYear, CatalogOption, CatalogVehicle, VehicleType } from '#shared/types/catalog'
+import type { VehicleProfile } from '#shared/types/tech-profile'
 import { findBrandById, listBrandsByType, markBrandModelsSynced, upsertBrands } from '../../repositories/fipe-brands'
 import { findModelById, listModelsByBrand, markModelYearsSynced, upsertModels } from '../../repositories/fipe-models'
 import type { ModelYearRecord } from '../../repositories/fipe-model-years'
@@ -81,7 +82,7 @@ export async function listModelYears(db: Db, modelId: number): Promise<CatalogMo
   return listModelYearsByModel(db, model.id)
 }
 
-/** Versão escolhida com o preço mais recente. Sem a FIPE, a versão é devolvida sem preço novo. */
+/** Versão escolhida com o preço mais recente e o perfil técnico. Sem a FIPE, a versão é devolvida sem preço novo. */
 export async function getVehicle(db: Db, modelYearId: number): Promise<CatalogVehicle> {
   const version = await findModelYearById(db, modelYearId)
 
@@ -103,7 +104,17 @@ export async function getVehicle(db: Db, modelYearId: number): Promise<CatalogVe
     fuel: version.fuel,
     fipeCode: quote?.fipeVehicleCode ?? version.fipeVehicleCode,
     price: await findLatestPrice(db, version.id),
+    profile: toVehicleProfile(version),
   }
+}
+
+/** O banco garante que versão mapeada tem perfil, e que sem perfil a situação é pendente ou falha. */
+function toVehicleProfile(version: ModelYearRecord): VehicleProfile {
+  if (version.techProfile) {
+    return { status: 'mapped', techProfile: version.techProfile }
+  }
+
+  return { status: version.mappingStatus === 'failed' ? 'failed' : 'pending' }
 }
 
 async function refreshQuote(db: Db, version: ModelYearRecord): Promise<FipeQuote> {
